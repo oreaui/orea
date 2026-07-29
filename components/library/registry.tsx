@@ -33,6 +33,10 @@ import { BarChartGrow } from "./bar-chart-grow"
 import { NotificationBell } from "./notification-bell"
 import { AuroraBackground } from "./aurora-background"
 import { MockChat } from "./mock-chat"
+import { SearchGlow } from "./search-glow"
+import { OtpInput } from "./otp-input"
+import { CommandPalette } from "./command-palette"
+import { ThemeToggle } from "./theme-toggle"
 
 export type Entry = {
   id: string
@@ -1156,6 +1160,216 @@ export function MockChat({
         </div>
       </div>
     </div>
+  )
+}`,
+  },
+  {
+    id: "search-glow",
+    title: "Rainbow search",
+    description: "Search bar with a rainbow glow that blooms on focus",
+    pro: true,
+    span: 2,
+    Component: SearchGlow,
+    code: `"use client"
+
+import { useState } from "react"
+import { motion } from "framer-motion"
+import { Search } from "lucide-react"
+
+export function SearchGlow() {
+  const [focused, setFocused] = useState(false)
+
+  return (
+    <div className="relative w-full max-w-md overflow-hidden rounded-[22px] border border-white/[0.06] bg-neutral-900/80 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)]">
+      <div className="relative z-10 flex items-center gap-3 px-5 py-4">
+        <Search className="h-5 w-5 shrink-0 text-neutral-500" />
+        <input
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          placeholder="Search"
+          className="w-full bg-transparent text-[15px] text-neutral-100 placeholder:text-neutral-500 focus:outline-none"
+        />
+      </div>
+
+      {/* Rainbow glow bleeding softly from the bottom edge */}
+      <motion.div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-8 bottom-0 h-3 translate-y-1/2 rounded-full blur-lg"
+        style={{
+          background:
+            "linear-gradient(90deg, transparent 0%, #f472b6 20%, #f59e0b 40%, #34d399 60%, #22d3ee 78%, #6366f1 92%, transparent 100%)",
+        }}
+        animate={{ opacity: focused ? 0.85 : 0.5, scaleX: focused ? 1 : 0.9 }}
+        transition={{ type: "spring", stiffness: 200, damping: 26 }}
+      />
+    </div>
+  )
+}`,
+  },
+  {
+    id: "otp-input",
+    title: "OTP input",
+    description: "Auto-advancing code fields that pop and turn green",
+    Component: OtpInput,
+    code: `"use client"
+
+import { useRef, useState } from "react"
+import { motion } from "framer-motion"
+
+export function OtpInput() {
+  const [values, setValues] = useState(["", "", "", ""])
+  const refs = useRef<(HTMLInputElement | null)[]>([])
+
+  function handleChange(i: number, v: string) {
+    const digit = v.replace(/\\D/g, "").slice(-1)
+    setValues((prev) => {
+      const next = [...prev]
+      next[i] = digit
+      return next
+    })
+    if (digit && i < 3) refs.current[i + 1]?.focus()
+  }
+
+  function handleKeyDown(i: number, e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "Backspace" && !values[i] && i > 0) refs.current[i - 1]?.focus()
+  }
+
+  const complete = values.every(Boolean)
+
+  return (
+    <div className="flex gap-3">
+      {values.map((value, i) => (
+        <motion.input
+          key={i}
+          ref={(el) => { refs.current[i] = el }}
+          value={value}
+          onChange={(e) => handleChange(i, e.target.value)}
+          onKeyDown={(e) => handleKeyDown(i, e)}
+          inputMode="numeric"
+          maxLength={1}
+          animate={{
+            scale: value ? [1, 1.12, 1] : 1,
+            borderColor: complete ? "#34d399" : value ? "#3b82f6" : "rgba(255,255,255,0.12)",
+          }}
+          transition={{ duration: 0.2 }}
+          className="h-14 w-12 rounded-xl border bg-neutral-800/60 text-center text-2xl font-semibold text-neutral-50 focus:outline-none"
+        />
+      ))}
+    </div>
+  )
+}`,
+  },
+  {
+    id: "command-palette",
+    title: "Command palette",
+    description: "Spring-in ⌘K menu with live filtering",
+    pro: true,
+    span: 2,
+    Component: CommandPalette,
+    code: `"use client"
+
+import { useMemo, useState } from "react"
+import { AnimatePresence, motion } from "framer-motion"
+import { Search, FileText, Settings, User, ArrowRight } from "lucide-react"
+
+const items = [
+  { icon: FileText, label: "New document" },
+  { icon: User, label: "Invite teammate" },
+  { icon: Settings, label: "Open settings" },
+  { icon: ArrowRight, label: "Go to dashboard" },
+]
+
+export function CommandPalette() {
+  const [open, setOpen] = useState(true)
+  const [query, setQuery] = useState("")
+
+  const filtered = useMemo(
+    () => items.filter((i) => i.label.toLowerCase().includes(query.toLowerCase())),
+    [query],
+  )
+
+  return (
+    <div className="flex flex-col items-center gap-4">
+      <button onClick={() => setOpen((v) => !v)} className="rounded-full border border-white/10 bg-neutral-800/80 px-4 py-1.5 text-sm text-neutral-100">
+        Toggle <kbd className="ml-1 rounded bg-white/10 px-1.5 py-0.5 text-xs">⌘K</kbd>
+      </button>
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: 8, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 8, scale: 0.98 }}
+            transition={{ type: "spring", stiffness: 340, damping: 28 }}
+            className="w-72 overflow-hidden rounded-2xl border border-white/10 bg-neutral-900/95 shadow-2xl backdrop-blur"
+          >
+            <div className="flex items-center gap-2 border-b border-white/[0.06] px-4 py-3">
+              <Search className="h-4 w-4 text-neutral-500" />
+              <input autoFocus value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Type a command..." className="w-full bg-transparent text-sm text-neutral-100 placeholder:text-neutral-500 focus:outline-none" />
+            </div>
+            <ul className="max-h-44 overflow-auto p-1.5">
+              {filtered.map((item) => (
+                <motion.li key={item.label} layout>
+                  <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-neutral-300 transition-colors hover:bg-white/[0.06] hover:text-white">
+                    <item.icon className="h-4 w-4 text-neutral-500" />
+                    {item.label}
+                  </button>
+                </motion.li>
+              ))}
+              {filtered.length === 0 && <li className="px-3 py-6 text-center text-sm text-neutral-500">No results</li>}
+            </ul>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}`,
+  },
+  {
+    id: "theme-toggle",
+    title: "Theme toggle",
+    description: "Sun morphs into a moon with animated rays",
+    Component: ThemeToggle,
+    code: `"use client"
+
+import { useState } from "react"
+import { motion } from "framer-motion"
+
+export function ThemeToggle() {
+  const [dark, setDark] = useState(true)
+
+  return (
+    <button
+      onClick={() => setDark((v) => !v)}
+      aria-label="Toggle theme"
+      className="relative flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl border border-white/10"
+      style={{ backgroundColor: dark ? "#0b1020" : "#e0f2fe" }}
+    >
+      {[...Array(8)].map((_, i) => (
+        <motion.span
+          key={i}
+          className="absolute left-1/2 top-1/2 h-2.5 w-0.5 rounded-full bg-amber-400"
+          style={{ transform: \`translate(-50%, -50%) rotate(\${i * 45}deg) translateY(-18px)\` }}
+          animate={{ scaleY: dark ? 0 : 1, opacity: dark ? 0 : 1 }}
+          transition={{ delay: dark ? 0 : i * 0.03, duration: 0.2 }}
+        />
+      ))}
+      <motion.div
+        animate={{
+          scale: dark ? 1 : 0.9,
+          backgroundColor: dark ? "#e2e8f0" : "#fbbf24",
+          boxShadow: dark ? "0 0 0 0 transparent" : "0 0 20px 3px rgba(251,191,36,0.6)",
+        }}
+        transition={{ type: "spring", stiffness: 260, damping: 20 }}
+        className="relative h-8 w-8 overflow-hidden rounded-full"
+      >
+        <motion.div
+          animate={{ x: dark ? 8 : 32, y: dark ? -4 : -12 }}
+          transition={{ type: "spring", stiffness: 260, damping: 20 }}
+          className="absolute h-8 w-8 rounded-full"
+          style={{ backgroundColor: "#0b1020" }}
+        />
+      </motion.div>
+    </button>
   )
 }`,
   },

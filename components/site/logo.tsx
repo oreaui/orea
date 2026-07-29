@@ -1,0 +1,35 @@
+import Link from "next/link"
+import { cn } from "@/lib/utils"
+
+export function LogoMark({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 206 133"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={cn("h-auto w-full", className)}
+      aria-hidden="true"
+    >
+      <path
+        d="M144 0C178.242 0 206 27.7583 206 62V71C206 105.242 178.242 133 144 133H131.686C102.244 133 74.4654 119.349 56.4775 96.041L49.5 87L26.5 57H49.5L0 0H144ZM117 32C102.088 32 90 44.0883 90 59V77.5C90 91.3071 101.193 102.5 115 102.5H150C163.807 102.5 175 91.3071 175 77.5V59C175 44.0883 162.912 32 148 32H117Z"
+        fill="currentColor"
+      />
+    </svg>
+  )
+}
+
+export function Logo({ className }: { className?: string }) {
+  return (
+    <Link
+      href="/"
+      className={cn(
+        "group inline-flex items-center gap-2.5 text-neutral-50 transition-opacity hover:opacity-80",
+        className,
+      )}
+      aria-label="Orea home"
+    >
+      <LogoMark className="w-7 text-neutral-50" />
+      <span className="text-lg font-semibold tracking-tight">Orea</span>
+    </Link>
+  )
+}
