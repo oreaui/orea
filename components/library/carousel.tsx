@@ -26,7 +26,7 @@ export function Carousel() {
   }
 
   return (
-    <div className="flex w-full max-w-md flex-col items-center gap-4">
+    <div className="flex w-full max-w-md min-w-[280px] flex-col items-center gap-4">
       <div className="relative h-48 w-full overflow-hidden rounded-2xl border border-white/10">
         <AnimatePresence initial={false} custom={dir} mode="sync">
           <motion.div

@@ -44,7 +44,13 @@ export function ComponentCard({ entry }: { entry: Entry }) {
               <code>{entry.code}</code>
             </motion.pre>
           ) : (
-            <motion.div key="demo" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <motion.div
+              key="demo"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="flex w-full items-center justify-center p-4"
+            >
               <Component />
             </motion.div>
           )}

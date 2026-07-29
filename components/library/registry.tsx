@@ -31,6 +31,8 @@ import { NumberTicker } from "./number-ticker"
 import { CopyField } from "./copy-field"
 import { BarChartGrow } from "./bar-chart-grow"
 import { NotificationBell } from "./notification-bell"
+import { AuroraBackground } from "./aurora-background"
+import { MockChat } from "./mock-chat"
 
 export type Entry = {
   id: string
@@ -1040,6 +1042,120 @@ export function NotificationBell() {
         )}
       </AnimatePresence>
     </button>
+  )
+}`,
+  },
+  {
+    id: "aurora-background",
+    title: "Aurora background",
+    description: "Animated glowing ambient orbs backdrop",
+    span: 2,
+    Component: AuroraBackground,
+    code: `"use client"
+
+import { motion } from "framer-motion"
+
+export function AuroraBackground() {
+  return (
+    <div className="relative h-48 w-full max-w-md overflow-hidden rounded-2xl border border-white/10 bg-neutral-950">
+      <motion.div
+        className="absolute -left-1/4 -top-1/4 h-64 w-64 rounded-full blur-3xl"
+        style={{ background: "radial-gradient(circle, rgba(59,130,246,0.5), transparent 70%)" }}
+        animate={{ x: [0, 120, 0], y: [0, 60, 0] }}
+        transition={{ duration: 12, ease: "easeInOut", repeat: Number.POSITIVE_INFINITY }}
+      />
+      <motion.div
+        className="absolute -right-1/4 top-1/3 h-56 w-56 rounded-full blur-3xl"
+        style={{ background: "radial-gradient(circle, rgba(236,72,153,0.45), transparent 70%)" }}
+        animate={{ x: [0, -100, 0], y: [0, -40, 0] }}
+        transition={{ duration: 10, ease: "easeInOut", repeat: Number.POSITIVE_INFINITY }}
+      />
+      <motion.div
+        className="absolute bottom-0 left-1/3 h-52 w-52 rounded-full blur-3xl"
+        style={{ background: "radial-gradient(circle, rgba(20,184,166,0.4), transparent 70%)" }}
+        animate={{ x: [0, 60, 0], y: [0, -50, 0] }}
+        transition={{ duration: 14, ease: "easeInOut", repeat: Number.POSITIVE_INFINITY }}
+      />
+      <div className="relative flex h-full items-center justify-center">
+        <span className="text-lg font-semibold text-white/90">Orea</span>
+      </div>
+    </div>
+  )
+}`,
+  },
+  {
+    id: "mock-chat",
+    title: "Mock chat input",
+    description: "Compact prompt input box with tags and send button",
+    Component: MockChat,
+    code: `"use client"
+
+import React from "react"
+import { motion } from "framer-motion"
+
+interface TagProps {
+  label: string
+  icon?: React.ReactNode
+}
+
+interface MockChatProps {
+  placeholder?: string
+  className?: string
+}
+
+const Tag: React.FC<TagProps> = ({ label, icon }) => (
+  <div className="flex items-center gap-1 px-[8px] pr-[6px] h-6 bg-white/5 rounded-[36px] text-[12px] text-[#caccce] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.02),inset_0_1px_0_0_rgba(255,255,255,0.04)] cursor-pointer hover:bg-white/10 transition-colors">
+    {icon && <span className="w-4 h-4 flex items-center justify-center">{icon}</span>}
+    <span>{label}</span>
+  </div>
+)
+
+export function MockChat({ 
+  placeholder = "Build anything...",
+  className = "" 
+}: MockChatProps) {
+  return (
+    <div className={\`group relative inline-block rounded-[20px] p-[1px] overflow-hidden bg-[#1d1d1d] shadow-[inset_0_0_0_1px_rgba(44,47,54,0.52),inset_0_0_50px_0_rgba(255,255,255,0.02)] \${className}\`}>
+      {/* Animated Border Beam Glow */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-[20px]">
+        <motion.div
+          className="absolute -inset-[100%] opacity-80 group-hover:opacity-100 transition-opacity"
+          style={{
+            background:
+              "conic-gradient(from 0deg at 50% 50%, transparent 0deg, transparent 270deg, rgba(59,130,246,0.9) 320deg, rgba(168,85,247,0.9) 350deg, transparent 360deg)",
+          }}
+          animate={{ rotate: 360 }}
+          transition={{ duration: 4, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+        />
+      </div>
+
+      {/* Inner Content Container */}
+      <div className="relative rounded-[19px] bg-[#1d1d1d]">
+        <div className="mock-chat-inner flex flex-col w-[273px] min-h-[100px] p-[7px_7px_8px] bg-transparent font-sans text-[#fbfbfb]">
+          <div className="placeholder pt-2 px-1 pb-0 text-[13px] text-[#4e4e4e] selection:bg-white/10">
+            {placeholder}
+          </div>
+
+          <div className="bottom-row mt-[23px] flex items-center gap-2">
+            <Tag 
+              label="Agent" 
+              icon={
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <path d="M7 11L10 8L7 5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              } 
+            />
+            <Tag label="Auto" />
+
+            <button className="send-btn ml-auto w-7 h-7 flex items-center justify-center bg-white/5 rounded-full text-[#fbfbfb] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.02),inset_0_1px_0_0_rgba(255,255,255,0.04)] hover:bg-white/10 active:scale-95 transition-all outline-none">
+              <svg width="12" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M8 12.6667V3.33333M12.6667 8L8 3.33333L3.33333 8" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }`,
   },

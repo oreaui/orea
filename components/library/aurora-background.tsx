@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion"
 
-export function OreaBackground() {
+export function AuroraBackground() {
   return (
     <div className="relative h-48 w-full max-w-md overflow-hidden rounded-2xl border border-white/10 bg-neutral-950">
       <motion.div
