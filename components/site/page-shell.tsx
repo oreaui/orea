@@ -17,7 +17,7 @@ export function PageShell({
     <div className="min-h-screen bg-background">
       <SiteHeader />
       <main>
-        <section className="relative overflow-hidden border-b border-white/[0.06]">
+        <section aria-labelledby="page-heading" className="relative overflow-hidden border-b border-white/[0.06]">
           <div
             aria-hidden
             className="pointer-events-none absolute left-1/2 top-0 h-[300px] w-[600px] -translate-x-1/2 rounded-full opacity-25 blur-[120px]"
@@ -28,7 +28,7 @@ export function PageShell({
               <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
               {eyebrow}
             </div>
-            <h1 className="text-balance text-3xl font-semibold tracking-tight text-neutral-50 sm:text-4xl lg:text-5xl">
+            <h1 id="page-heading" className="text-balance text-3xl font-semibold tracking-tight text-neutral-50 sm:text-4xl lg:text-5xl">
               {title}
             </h1>
             <p className="mx-auto mt-4 max-w-xl text-pretty leading-relaxed text-neutral-400">

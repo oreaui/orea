@@ -10,11 +10,12 @@ const SVG_MARKUP = `<svg width="206" height="133" viewBox="0 0 206 133" xmlns="h
 
 function LogoMesh() {
   const group = useRef<THREE.Group>(null)
+  const elapsed = useRef(0)
 
   const geometry = useMemo(() => {
     const loader = new SVGLoader()
     const parsed = loader.parse(SVG_MARKUP)
-    const shapes = parsed.paths.flatMap((p) => SVGLoader.createShapes(p))
+    const shapes = parsed.paths.flatMap((p) => p.toShapes())
     const geo = new THREE.ExtrudeGeometry(shapes, {
       depth: 34,
       bevelEnabled: true,
@@ -27,9 +28,10 @@ function LogoMesh() {
     return geo
   }, [])
 
-  useFrame((state) => {
+  useFrame((state, delta) => {
     if (!group.current) return
-    const t = state.clock.getElapsedTime()
+    elapsed.current += delta
+    const t = elapsed.current
     // gentle idle spin + subtle pointer parallax
     group.current.rotation.y = Math.sin(t * 0.3) * 0.5 + state.pointer.x * 0.4
     group.current.rotation.x = Math.cos(t * 0.25) * 0.15 - state.pointer.y * 0.25
@@ -53,7 +55,7 @@ function LogoMesh() {
 export function Logo3D() {
   return (
     <Canvas
-      shadows
+      shadows={{ type: THREE.PCFShadowMap }}
       dpr={[1, 2]}
       camera={{ position: [0, 0, 9], fov: 42 }}
       gl={{ antialias: true, alpha: true }}

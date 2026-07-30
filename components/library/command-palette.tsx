@@ -41,7 +41,6 @@ export function CommandPalette() {
             <div className="flex items-center gap-2 border-b border-white/[0.06] px-4 py-3">
               <Search className="h-4 w-4 text-neutral-500" />
               <input
-                autoFocus
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Type a command..."

@@ -4,8 +4,13 @@ import { PageShell } from "@/components/site/page-shell"
 import { Search, MousePointerClick, Copy, Rocket } from "lucide-react"
 
 export const metadata: Metadata = {
-  title: "How to use — Orea",
-  description: "Learn how to browse, preview, and copy Orea components into your own React project in minutes.",
+  title: "How to use",
+  description: "Learn how to browse, preview, and copy Orea animated React components into your own project in minutes. Copy-paste workflow with Framer Motion and Lucide.",
+  openGraph: {
+    title: "How to use Orea UI",
+    description: "Browse, preview, and copy animated React components into your project with our simple four-step workflow.",
+    url: "https://www.orea.ink/how-to-use",
+  },
 }
 
 const steps = [

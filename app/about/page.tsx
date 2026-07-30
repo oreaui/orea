@@ -4,9 +4,15 @@ import { Sparkles, Code2, Zap, Heart } from "lucide-react"
 import { registry } from "@/components/library/registry"
 
 export const metadata: Metadata = {
-  title: "About us — Orea",
+  title: "About us",
   description:
-    "Orea is a curated library of premium, animated React components built to help teams ship polished interfaces faster.",
+    "Orea is a curated library of premium, animated React components built to help teams ship polished interfaces faster. Open-source, copy-paste UI powered by Framer Motion.",
+  openGraph: {
+    title: "About Orea UI — Premium animated components",
+    description:
+      "Learn about Orea: a curated collection of production-ready, animated React components. Open-source and free for personal and commercial use.",
+    url: "https://www.orea.ink/about",
+  },
 }
 
 const values = [

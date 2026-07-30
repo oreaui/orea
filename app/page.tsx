@@ -11,9 +11,9 @@ export default function Page() {
       <main>
         <Hero count={registry.length} />
 
-        <section id="components" className="mx-auto max-w-6xl scroll-mt-20 px-6 py-16">
+        <section id="components" aria-labelledby="library-heading" className="mx-auto max-w-6xl scroll-mt-20 px-6 py-16">
           <div className="mb-10 text-center">
-            <h2 className="text-balance text-2xl font-semibold tracking-tight text-neutral-50 sm:text-3xl">
+            <h2 id="library-heading" className="text-balance text-2xl font-semibold tracking-tight text-neutral-50 sm:text-3xl">
               The component library
             </h2>
             <p className="mx-auto mt-3 max-w-md text-pretty leading-relaxed text-neutral-400">

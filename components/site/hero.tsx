@@ -25,12 +25,12 @@ export function Hero({ count }: { count: number }) {
 
       <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-8 px-6 py-16 lg:grid-cols-2 lg:py-24">
         <div className="relative z-10 text-center lg:text-left">
-          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-xs text-neutral-400">
+          <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-xs text-neutral-400">
             <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
             {count} premium components
-          </div>
+          </p>
           <h1 className="text-balance text-4xl font-semibold tracking-tight text-neutral-50 sm:text-5xl lg:text-6xl">
-            Premium animated components for modern products
+            Premium animated React components for modern products
           </h1>
           <p className="mx-auto mt-5 max-w-md text-pretty leading-relaxed text-neutral-400 lg:mx-0">
             Orea is a curated set of production-ready React components powered by Framer Motion. Preview,

@@ -17,6 +17,13 @@ const links = [
       { href: "/contact", label: "Contact us" },
     ],
   },
+  {
+    title: "Legal",
+    items: [
+      { href: "/privacy", label: "Privacy Policy" },
+      { href: "/license", label: "License" },
+    ],
+  },
 ]
 
 export function SiteFooter() {
@@ -40,10 +47,10 @@ export function SiteFooter() {
             </a>
           </div>
 
-          <div className="grid grid-cols-2 gap-10 sm:gap-20">
+          <div className="grid grid-cols-2 gap-10 sm:grid-cols-3 sm:gap-16">
             {links.map((group) => (
-              <div key={group.title}>
-                <h3 className="text-sm font-medium text-neutral-300">{group.title}</h3>
+              <nav key={group.title} aria-label={group.title}>
+                <h2 className="text-sm font-medium text-neutral-300">{group.title}</h2>
                 <ul className="mt-4 flex flex-col gap-3">
                   {group.items.map((item) => (
                     <li key={item.href}>
@@ -56,7 +63,7 @@ export function SiteFooter() {
                     </li>
                   ))}
                 </ul>
-              </div>
+              </nav>
             ))}
           </div>
         </div>

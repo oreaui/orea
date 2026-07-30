@@ -5,16 +5,21 @@ import { GithubIcon } from "@/components/site/github-icon"
 import { Mail, MessageSquare } from "lucide-react"
 
 export const metadata: Metadata = {
-  title: "Contact us — Orea",
-  description: "Get in touch with the Orea team. Questions, feedback, or partnership ideas — we'd love to hear from you.",
+  title: "Contact us",
+  description: "Get in touch with the Orea team. Have a question, found a bug, or need a custom component? We'd love to hear from you.",
+  openGraph: {
+    title: "Contact Orea UI",
+    description: "Reach out to the Orea team with questions, feedback, or component requests.",
+    url: "https://www.orea.ink/contact",
+  },
 }
 
 const channels = [
   {
     icon: Mail,
     title: "Email",
-    body: "hello@orea.dev",
-    href: "mailto:hello@orea.dev",
+    body: "info@orea.ink",
+    href: "mailto:info@orea.ink",
   },
   {
     icon: GithubIcon,
