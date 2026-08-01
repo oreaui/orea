@@ -27,8 +27,8 @@ export function ComponentCard({ entry }: { entry: Entry }) {
       }`}
     >
       {entry.pro && (
-        <span className="float-right mr-3 mt-3 rounded-md bg-blue-500/20 px-1.5 py-0.5 text-[10px] font-semibold text-blue-400">
-          Pro
+        <span className="float-right mr-3 mt-3 rounded-md bg-emerald-500/20 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-400">
+          New
         </span>
       )}
       <div className="flex h-64 items-center justify-center overflow-hidden rounded-2xl">
