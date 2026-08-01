@@ -22,9 +22,12 @@ export function CheckboxDraw() {
             strokeWidth="3"
             strokeLinecap="round"
             strokeLinejoin="round"
-            initial={false}
-            animate={{ pathLength: checked ? 1 : 0 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
+            initial={{ pathLength: 0, opacity: 0 }}
+            animate={{ pathLength: checked ? 1 : 0, opacity: checked ? 1 : 0 }}
+            transition={{
+              pathLength: { duration: 0.3, ease: "easeInOut" },
+              opacity: { duration: checked ? 0.05 : 0.15 },
+            }}
           />
         </svg>
       </motion.span>

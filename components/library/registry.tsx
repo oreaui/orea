@@ -37,6 +37,11 @@ import { SearchGlow } from "./search-glow"
 import { OtpInput } from "./otp-input"
 import { CommandPalette } from "./command-palette"
 import { ThemeToggle } from "./theme-toggle"
+import { TerminalWindow } from "./terminal-window"
+import { TextScramble } from "./text-scramble"
+import { ChatConversation } from "./chat-conversation"
+import { RotatingTabs } from "./rotating-tabs"
+import { DynamicIsland } from "./dynamic-island"
 
 export type Entry = {
   id: string
@@ -104,31 +109,69 @@ export function TiltCard() {
     code: `"use client"
 
 import { useState } from "react"
-import { AnimatePresence, motion } from "framer-motion"
-import { Plus } from "lucide-react"
+import { motion } from "framer-motion"
+import { Plus, User, Settings, LogOut } from "lucide-react"
+
+const items = [
+  { icon: User, label: "Profile" },
+  { icon: Settings, label: "Settings" },
+  { icon: LogOut, label: "Sign out" },
+]
+
+// Explicit dimensions keep the morph perfectly smooth (no "height: auto" measuring).
+const SIZE = 48
+const ITEM_H = 40
+const OPEN_WIDTH = 208
+const OPEN_HEIGHT = SIZE + items.length * ITEM_H + 8
+const easing = [0.22, 1, 0.36, 1] as const
 
 export function DropdownMorph() {
   const [open, setOpen] = useState(false)
   return (
     <motion.div
-      layout
-      onClick={() => setOpen((v) => !v)}
-      className="cursor-pointer overflow-hidden border border-white/10 bg-neutral-800/80"
-      style={{ borderRadius: open ? 16 : 999 }}
-      transition={{ type: "spring", stiffness: 400, damping: 32 }}
+      className="overflow-hidden border border-white/10 bg-neutral-800/90 shadow-xl"
+      initial={false}
+      animate={{
+        width: open ? OPEN_WIDTH : SIZE,
+        height: open ? OPEN_HEIGHT : SIZE,
+        borderRadius: open ? 20 : 999,
+      }}
+      transition={{ duration: 0.4, ease: easing }}
     >
-      <motion.div layout className="flex h-12 w-12 items-center justify-center">
-        <motion.div animate={{ rotate: open ? 45 : 0 }}>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        className="flex h-12 w-12 shrink-0 items-center justify-center outline-none"
+      >
+        <motion.span animate={{ rotate: open ? 45 : 0 }} transition={{ duration: 0.4, ease: easing }}>
           <Plus className="h-5 w-5 text-neutral-200" />
-        </motion.div>
-      </motion.div>
-      <AnimatePresence>
-        {open && (
-          <motion.ul initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-44 px-2 pb-2">
-            {/* items */}
-          </motion.ul>
-        )}
-      </AnimatePresence>
+        </motion.span>
+      </button>
+      <motion.ul
+        className="px-2 pb-2"
+        aria-hidden={!open}
+        animate={{ opacity: open ? 1 : 0 }}
+        transition={{ duration: 0.2, ease: "easeOut", delay: open ? 0.1 : 0 }}
+        style={{ pointerEvents: open ? "auto" : "none" }}
+      >
+        {items.map((item, i) => (
+          <motion.li
+            key={item.label}
+            animate={{ opacity: open ? 1 : 0, x: open ? 0 : -10 }}
+            transition={{ duration: 0.28, ease: easing, delay: open ? 0.12 + i * 0.05 : 0 }}
+          >
+            <button
+              type="button"
+              className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm text-neutral-200 transition-colors hover:bg-white/10"
+              style={{ height: ITEM_H }}
+            >
+              <item.icon className="h-4 w-4 shrink-0 text-neutral-400" />
+              {item.label}
+            </button>
+          </motion.li>
+        ))}
+      </motion.ul>
     </motion.div>
   )
 }`,
@@ -234,7 +277,8 @@ export function CheckboxDraw() {
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
           <motion.path d="M4 12.5L9.5 18L20 6" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"
-            initial={false} animate={{ pathLength: checked ? 1 : 0 }} transition={{ duration: 0.3 }} />
+            initial={{ pathLength: 0, opacity: 0 }} animate={{ pathLength: checked ? 1 : 0, opacity: checked ? 1 : 0 }}
+            transition={{ pathLength: { duration: 0.3, ease: "easeInOut" }, opacity: { duration: checked ? 0.05 : 0.15 } }} />
         </svg>
       </motion.span>
       Notify me
@@ -1370,6 +1414,363 @@ export function ThemeToggle() {
         />
       </motion.div>
     </button>
+  )
+}`,
+  },
+  {
+    id: "terminal-window",
+    title: "Terminal",
+    description: "Auto-typing terminal with animated command output",
+    span: 2,
+    Component: TerminalWindow,
+    code: `"use client"
+
+import { useEffect, useRef, useState } from "react"
+import { motion } from "framer-motion"
+
+type Line =
+  | { type: "cmd"; text: string }
+  | { type: "out"; text: string; tone?: "muted" | "success" | "accent" }
+
+const script: Line[] = [
+  { type: "cmd", text: "npx orea add dynamic-island" },
+  { type: "out", text: "✔ Installed to components/ui", tone: "success" },
+  { type: "cmd", text: "orea build --premium" },
+  { type: "out", text: "✔ Done in 1.2s", tone: "success" },
+]
+
+export function TerminalWindow() {
+  const [rendered, setRendered] = useState<Line[]>([])
+  const [typing, setTyping] = useState("")
+
+  useEffect(() => {
+    let cancelled = false
+    const timers: ReturnType<typeof setTimeout>[] = []
+    const wait = (ms: number) => new Promise<void>((res) => timers.push(setTimeout(res, ms)))
+
+    async function run() {
+      while (!cancelled) {
+        setRendered([]); setTyping(""); await wait(500)
+        for (const line of script) {
+          if (cancelled) return
+          if (line.type === "cmd") {
+            for (let i = 1; i <= line.text.length; i++) { setTyping(line.text.slice(0, i)); await wait(34) }
+            await wait(260); setTyping(""); setRendered((p) => [...p, line])
+          } else { setRendered((p) => [...p, line]); await wait(240) }
+        }
+        await wait(2200)
+      }
+    }
+    run()
+    return () => { cancelled = true; timers.forEach(clearTimeout) }
+  }, [])
+
+  return (
+    <div className="w-72 overflow-hidden rounded-xl border border-white/10 bg-neutral-950/90">
+      <div className="flex gap-1.5 border-b border-white/[0.06] px-3 py-2.5">
+        <span className="h-2.5 w-2.5 rounded-full bg-red-500/80" />
+        <span className="h-2.5 w-2.5 rounded-full bg-yellow-500/80" />
+        <span className="h-2.5 w-2.5 rounded-full bg-green-500/80" />
+      </div>
+      <div className="h-40 p-3 font-mono text-[12px] leading-relaxed">
+        {rendered.map((line, i) => (
+          <div key={i} className="flex gap-2">
+            {line.type === "cmd"
+              ? <><span className="text-blue-400">$</span><span className="text-neutral-100">{line.text}</span></>
+              : <span className="text-emerald-400">{line.text}</span>}
+          </div>
+        ))}
+        {typing && (
+          <div className="flex gap-2">
+            <span className="text-blue-400">$</span>
+            <span className="text-neutral-100">{typing}
+              <motion.span animate={{ opacity: [1, 0] }} transition={{ duration: 0.6, repeat: Infinity }}
+                className="ml-0.5 inline-block h-3.5 w-1.5 translate-y-0.5 bg-blue-400" />
+            </span>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}`,
+  },
+  {
+    id: "text-scramble",
+    title: "Text scramble",
+    description: "Glyph decode effect that morphs between words",
+    Component: TextScramble,
+    code: `"use client"
+
+import { useEffect, useRef, useState } from "react"
+
+const words = ["Premium", "Animated", "Effortless", "Beautiful"]
+const glyphs = "ABCDEFGHIJKLMNOPQRSTUVWXYZ!<>-_/[]{}=+*^?#"
+
+export function TextScramble() {
+  const [display, setDisplay] = useState(words[0])
+  const frame = useRef(0)
+
+  useEffect(() => {
+    let wordIndex = 0
+    let queue: { from: string; to: string; start: number; end: number }[] = []
+    let req: number
+
+    function setText(next: string) {
+      const prev = display
+      const len = Math.max(prev.length, next.length)
+      queue = []
+      for (let i = 0; i < len; i++) {
+        const start = Math.floor(Math.random() * 20)
+        queue.push({ from: prev[i] || "", to: next[i] || "", start, end: start + Math.floor(Math.random() * 20) + 12 })
+      }
+      frame.current = 0
+      update()
+    }
+
+    function update() {
+      let out = "", done = 0
+      for (const q of queue) {
+        if (frame.current >= q.end) { done++; out += q.to }
+        else if (frame.current >= q.start) out += glyphs[Math.floor(Math.random() * glyphs.length)]
+        else out += q.from
+      }
+      setDisplay(out)
+      if (done === queue.length) return
+      frame.current++
+      req = requestAnimationFrame(update)
+    }
+
+    const interval = setInterval(() => { wordIndex = (wordIndex + 1) % words.length; setText(words[wordIndex]) }, 2200)
+    return () => { clearInterval(interval); cancelAnimationFrame(req) }
+  }, [])
+
+  return (
+    <span className="bg-gradient-to-b from-white to-neutral-400 bg-clip-text font-mono text-4xl font-semibold text-transparent">
+      {display}
+    </span>
+  )
+}`,
+  },
+  {
+    id: "chat-conversation",
+    title: "Chat conversation",
+    description: "Messages stream in with a bouncing typing indicator",
+    span: 2,
+    Component: ChatConversation,
+    code: `"use client"
+
+import { useEffect, useState } from "react"
+import { AnimatePresence, motion } from "framer-motion"
+
+type Msg = { id: number; role: "them" | "me"; text: string }
+const conversation: Omit<Msg, "id">[] = [
+  { role: "them", text: "Did you ship the new components?" },
+  { role: "me", text: "Just pushed them 🚀" },
+  { role: "them", text: "The morph is so smooth" },
+]
+
+export function ChatConversation() {
+  const [messages, setMessages] = useState<Msg[]>([])
+  const [typing, setTyping] = useState(false)
+
+  useEffect(() => {
+    let cancelled = false
+    const timers: ReturnType<typeof setTimeout>[] = []
+    const wait = (ms: number) => new Promise<void>((res) => timers.push(setTimeout(res, ms)))
+    async function run() {
+      while (!cancelled) {
+        setMessages([]); await wait(600); let id = 0
+        for (const msg of conversation) {
+          setTyping(true); await wait(msg.text.length * 22 + 500)
+          setTyping(false); setMessages((p) => [...p, { ...msg, id: id++ }]); await wait(650)
+        }
+        await wait(2400)
+      }
+    }
+    run()
+    return () => { cancelled = true; timers.forEach(clearTimeout) }
+  }, [])
+
+  return (
+    <div className="flex w-72 flex-col gap-2">
+      <AnimatePresence initial={false}>
+        {messages.map((msg) => (
+          <motion.div key={msg.id} layout
+            initial={{ opacity: 0, y: 10, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ type: "spring", stiffness: 500, damping: 30 }}
+            className={\`flex \${msg.role === "me" ? "justify-end" : "justify-start"}\`}>
+            <span className={\`max-w-[78%] rounded-2xl px-3 py-1.5 text-[13px] \${msg.role === "me" ? "bg-blue-600 text-white" : "bg-white/[0.08] text-neutral-100"}\`}>
+              {msg.text}
+            </span>
+          </motion.div>
+        ))}
+        {typing && (
+          <motion.div key="typing" layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-start">
+            <span className="flex gap-1 rounded-2xl bg-white/[0.08] px-3 py-2.5">
+              {[0, 1, 2].map((i) => (
+                <motion.span key={i} className="h-1.5 w-1.5 rounded-full bg-neutral-400"
+                  animate={{ y: [0, -4, 0] }} transition={{ duration: 0.9, repeat: Infinity, delay: i * 0.15 }} />
+              ))}
+            </span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}`,
+  },
+  {
+    id: "rotating-tabs",
+    title: "Rotating tabs",
+    description: "3D flip panels driven by a sliding tab pill",
+    Component: RotatingTabs,
+    code: `"use client"
+
+import { useEffect, useState } from "react"
+import { AnimatePresence, motion } from "framer-motion"
+import { Zap, Shield, Sparkles } from "lucide-react"
+
+const tabs = [
+  { id: "fast", label: "Fast", icon: Zap, title: "Blazing fast", body: "Ships in milliseconds." },
+  { id: "safe", label: "Secure", icon: Shield, title: "Secure by default", body: "Hardened by default." },
+  { id: "pretty", label: "Polished", icon: Sparkles, title: "Pixel perfect", body: "Spring physics tuned." },
+]
+
+export function RotatingTabs() {
+  const [active, setActive] = useState(0)
+  useEffect(() => {
+    const t = setInterval(() => setActive((v) => (v + 1) % tabs.length), 3000)
+    return () => clearInterval(t)
+  }, [])
+  const current = tabs[active]
+
+  return (
+    <div className="flex w-72 flex-col items-center gap-4">
+      <div className="flex gap-1 rounded-full border border-white/10 bg-neutral-800/60 p-1">
+        {tabs.map((tab, i) => (
+          <button key={tab.id} onClick={() => setActive(i)} className="relative rounded-full px-3.5 py-1.5 text-[13px] font-medium">
+            {active === i && (
+              <motion.span layoutId="rotating-pill" transition={{ type: "spring", stiffness: 400, damping: 32 }}
+                className="absolute inset-0 rounded-full bg-white/[0.12]" />
+            )}
+            <span className={\`relative z-10 flex items-center gap-1.5 \${active === i ? "text-white" : "text-neutral-400"}\`}>
+              <tab.icon className="h-3.5 w-3.5" />{tab.label}
+            </span>
+          </button>
+        ))}
+      </div>
+      <div className="relative h-24 w-full" style={{ perspective: 1000 }}>
+        <AnimatePresence mode="popLayout">
+          <motion.div key={current.id}
+            initial={{ rotateX: -70, opacity: 0, y: 12 }} animate={{ rotateX: 0, opacity: 1, y: 0 }} exit={{ rotateX: 70, opacity: 0, y: -12 }}
+            transition={{ type: "spring", stiffness: 260, damping: 26 }} style={{ transformStyle: "preserve-3d" }}
+            className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 rounded-2xl border border-white/[0.06] bg-white/[0.02] px-6 text-center">
+            <h3 className="text-lg font-semibold text-neutral-100">{current.title}</h3>
+            <p className="text-[13px] text-neutral-400">{current.body}</p>
+          </motion.div>
+        </AnimatePresence>
+      </div>
+    </div>
+  )
+}`,
+  },
+  {
+    id: "dynamic-island",
+    title: "Dynamic Island",
+    description: "iOS-style island morphing between live activities",
+    pro: true,
+    span: 2,
+    Component: DynamicIsland,
+    code: `"use client"
+
+import { useEffect, useState } from "react"
+import { AnimatePresence, motion } from "framer-motion"
+import { Music, Phone, PhoneOff, Timer } from "lucide-react"
+
+type State = "idle" | "music" | "call" | "timer"
+const order: State[] = ["idle", "music", "call", "timer"]
+const sizes: Record<State, { width: number; height: number; radius: number }> = {
+  idle:  { width: 120, height: 36, radius: 20 },
+  music: { width: 288, height: 72, radius: 30 },
+  call:  { width: 288, height: 72, radius: 30 },
+  timer: { width: 200, height: 44, radius: 24 },
+}
+const spring = { type: "spring" as const, stiffness: 420, damping: 34, mass: 0.9 }
+
+export function DynamicIsland() {
+  const [state, setState] = useState<State>("idle")
+  useEffect(() => {
+    let i = 0
+    const t = setInterval(() => { i = (i + 1) % order.length; setState(order[i]) }, 2600)
+    return () => clearInterval(t)
+  }, [])
+  const size = sizes[state]
+
+  return (
+    <div className="flex flex-col items-center gap-5">
+      <motion.div animate={{ width: size.width, height: size.height, borderRadius: size.radius }} transition={spring}
+        className="flex items-center justify-center overflow-hidden bg-black text-white shadow-[0_0_0_1px_rgba(255,255,255,0.06)]">
+        <AnimatePresence mode="popLayout" initial={false}>
+          {state === "idle" && (
+            <motion.div key="idle" initial={{ opacity: 0, scale: 0.7 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.7 }} transition={spring}
+              className="flex items-center gap-2 px-4">
+              <span className="h-2 w-2 rounded-full bg-neutral-600" />
+            </motion.div>
+          )}
+          {state === "music" && (
+            <motion.div key="music" initial={{ opacity: 0, scale: 0.85 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.85 }} transition={spring}
+              className="flex w-full items-center gap-3 px-3">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600">
+                <Music className="h-5 w-5" />
+              </div>
+              <div className="min-w-0 flex-1 leading-tight">
+                <p className="truncate text-[13px] font-medium">Midnight City</p>
+                <p className="truncate text-[11px] text-neutral-400">M83</p>
+              </div>
+              <div className="flex items-end gap-0.5">
+                {[0, 1, 2, 3].map((i) => (
+                  <motion.span key={i} className="w-1 rounded-full bg-blue-400" animate={{ height: [6, 18, 10, 20, 6] }}
+                    transition={{ duration: 1, repeat: Infinity, delay: i * 0.12 }} />
+                ))}
+              </div>
+            </motion.div>
+          )}
+          {state === "call" && (
+            <motion.div key="call" initial={{ opacity: 0, scale: 0.85 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.85 }} transition={spring}
+              className="flex w-full items-center gap-3 px-3">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-emerald-500">
+                <Phone className="h-5 w-5" />
+              </div>
+              <div className="min-w-0 flex-1 leading-tight">
+                <p className="truncate text-[13px] font-medium">Incoming call</p>
+                <p className="truncate text-[11px] text-neutral-400">Ava Chen</p>
+              </div>
+              <div className="flex gap-2">
+                <button className="flex h-8 w-8 items-center justify-center rounded-full bg-red-500">
+                  <PhoneOff className="h-3.5 w-3.5" />
+                </button>
+                <button className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500">
+                  <Phone className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            </motion.div>
+          )}
+          {state === "timer" && (
+            <motion.div key="timer" initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }} transition={spring}
+              className="flex items-center gap-2 px-4">
+              <Timer className="h-4 w-4 text-orange-400" />
+              <span className="font-mono text-sm tabular-nums">00:24</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
+      <div className="flex gap-1.5">
+        {order.map((s) => (
+          <button key={s} onClick={() => setState(s)} aria-label={s}
+            className={\`h-1.5 rounded-full transition-all \${state === s ? "w-5 bg-white" : "w-1.5 bg-white/25"}\`} />
+        ))}
+      </div>
+    </div>
   )
 }`,
   },
