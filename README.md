@@ -108,7 +108,7 @@ Colors, typography, spacing, and border-radius values live in [orea-tokens](http
 
 ## Browser & device support
 
-Tested on desktop and mobile — Chrome, Edge, and Android. If something renders incorrectly on your device or browser, please [open an issue](https://github.com/oreaui/orea-ui/issues) with your device/browser details — this is actively maintained and fixed based on feedback.
+Tested on desktop and mobile — Chrome, Edge, and Android. If something renders incorrectly on your device or browser, please [open an issue](https://github.com/oreaui/orea/issues) with your device/browser details — this is actively maintained and fixed based on feedback.
 
 ---
 
