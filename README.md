@@ -6,7 +6,7 @@
 
 A free, open-source library of animated React components built with Framer Motion.
 
-[Website](https://orea.ink) · [Components](https://orea.ink/docs) · [Report a bug](https://github.com/oreaui/orea-ui/issues) · [Contributing](./CONTRIBUTING.md)
+[Website](https://orea.ink) · [How to use](https://www.orea.ink/how-to-use) · [Report a bug](https://github.com/oreaui/orea/issues) · [Contributing](./CONTRIBUTING.md)
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![npm](https://img.shields.io/npm/v/@oreaui/orea-ui)
